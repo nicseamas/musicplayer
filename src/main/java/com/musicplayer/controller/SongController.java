@@ -21,11 +21,13 @@ public class SongController {
     return songService.getSongById(id);
 }
     @GetMapping("/paginated")
-       public Page<Song> getPaginatedSongs(
+public Page<Song> getPaginatedSongs(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
-        @RequestParam(defaultValue = "title") String sortBy) {
-    return songService.getSongs(page, size, sortBy);
+        @RequestParam(defaultValue = "title") String sortBy,
+        @RequestParam(defaultValue = "asc") String direction) {
+
+    return songService.getSongs(page, size, sortBy, direction);
 }
 
     @PostMapping
@@ -56,6 +58,15 @@ public List<Song> searchByAlbum(@RequestParam String album) {
 @GetMapping("/search/title")
 public List<Song> searchByTitle(@RequestParam String title) {
     return songService.searchSongsByTitle(title);
+}
+
+@GetMapping("/search")
+public List<Song> searchSongs(
+        @RequestParam(defaultValue = "") String title,
+        @RequestParam(defaultValue = "") String artist,
+        @RequestParam(defaultValue = "") String album) {
+
+    return songService.searchSongs(title, artist, album);
 }
 
 

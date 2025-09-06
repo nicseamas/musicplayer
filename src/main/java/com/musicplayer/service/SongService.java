@@ -23,11 +23,12 @@ public class SongService {
                 .orElseThrow(() -> new SongNotFoundException("Song with ID " + id + " not found"));
     }
 
-    public Page<Song> getSongs(int page, int size, String sortBy) {
-    if (size <= 0) size = 10; 
-    if (page < 0) page = 0;   
-    if (sortBy == null || sortBy.isEmpty()) sortBy = "title"; // Default sorting
-    Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+    public Page<Song> getSongs(int page, int size, String sortBy, String direction) {
+    Sort sort = direction.equalsIgnoreCase("desc") ?
+            Sort.by(sortBy).descending() :
+            Sort.by(sortBy).ascending();
+
+    Pageable pageable = PageRequest.of(page, size, sort);
     return songRepository.findAll(pageable);
 }
 
@@ -80,6 +81,20 @@ public List<Song> searchSongsByTitle(String title) {
         return songs;
     }
 
+    public List<Song> searchSongs(String title, String artist, String album) {
+    List<Song> songs = songRepository
+            .findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCaseAndAlbumContainingIgnoreCase(
+                    title, artist, album);
+
+    if (songs.isEmpty()) {
+        throw new SongNotFoundException(
+                "No songs found matching title: " + title +
+                ", artist: " + artist +
+                ", album: " + album);
+    }
+
+    return songs;
+}
 
 
     
