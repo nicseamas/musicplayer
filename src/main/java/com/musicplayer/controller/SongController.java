@@ -1,10 +1,10 @@
 package com.musicplayer.controller;
-
 import com.musicplayer.model.Song;
 import com.musicplayer.service.SongService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 @RestController
 @RequestMapping("/songs")
@@ -16,15 +16,22 @@ public class SongController {
         this.songService = songService;
     }
 
-    @GetMapping
-    public List<Song> getAllSongs() {
-        return songService.getAllSongs();
-    }
+    @GetMapping("/{id}")
+    public Song getSongById(@PathVariable Long id) {
+    return songService.getSongById(id);
+}
+    @GetMapping("/paginated")
+       public Page<Song> getPaginatedSongs(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "title") String sortBy) {
+    return songService.getSongs(page, size, sortBy);
+}
 
-     @PostMapping
-    public Song addSong(@RequestBody Song song) {
-        return songService.saveSong(song);
-    }
+    @PostMapping
+    public Song addSong(@Valid @RequestBody Song song) {
+    return songService.saveSong(song);
+}
 
     @DeleteMapping("/{id}")
     public void deleteSong(@PathVariable Long id) {
