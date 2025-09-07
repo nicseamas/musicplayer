@@ -52,7 +52,6 @@ public class SongControllerTest {
         song.setDuration(240);
         song.setReleaseYear(2023);
 
-        
         Song song2 = new Song();
         song2.setId(2L);
         song2.setTitle("Declan Rice");
@@ -170,7 +169,7 @@ public class SongControllerTest {
             mockMvc.perform(post("/songs")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(song)))
-                    .andExpect(status().isCreated()) 
+                    .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.title").value("Dog Eat Dog II"))
                     .andExpect(jsonPath("$.artist").value("Odumodublvck"))
                     .andExpect(jsonPath("$.album").value("Eziokwu"))
@@ -261,7 +260,7 @@ public class SongControllerTest {
             updatedSong.setArtist("Odumodublvck");
             updatedSong.setAlbum("Eziokwu");
             updatedSong.setDuration(200);
-           updatedSong.setReleaseYear(2023);
+            updatedSong.setReleaseYear(2023);
 
             when(songService.updateSong(eq(1L), any(Song.class))).thenReturn(updatedSong);
 
@@ -315,24 +314,24 @@ public class SongControllerTest {
 
         }
 
-       @Test
-@DisplayName("Should return 400 when release year is in the future")
-void testUpdateSong_FutureReleaseYear() throws Exception {
-    Song songWithFutureYear = new Song();
-    songWithFutureYear.setTitle("Test Song");
-    songWithFutureYear.setArtist("Test Artist");
-    songWithFutureYear.setAlbum("Test Album");
-    songWithFutureYear.setDuration(200);
-    songWithFutureYear.setReleaseYear(3000); 
+        @Test
+        @DisplayName("Should return 400 when release year is in the future")
+        void testUpdateSong_FutureReleaseYear() throws Exception {
+            Song songWithFutureYear = new Song();
+            songWithFutureYear.setTitle("Test Song");
+            songWithFutureYear.setArtist("Test Artist");
+            songWithFutureYear.setAlbum("Test Album");
+            songWithFutureYear.setDuration(200);
+            songWithFutureYear.setReleaseYear(3000);
 
-    mockMvc.perform(put("/songs/1")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(songWithFutureYear)))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().string(containsString("Release year cannot be in the future")));
+            mockMvc.perform(put("/songs/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(songWithFutureYear)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(containsString("Release year cannot be in the future")));
 
-    verify(songService, never()).updateSong(anyLong(), any(Song.class));
-}
+            verify(songService, never()).updateSong(anyLong(), any(Song.class));
+        }
 
     }
 
@@ -346,7 +345,7 @@ void testUpdateSong_FutureReleaseYear() throws Exception {
             doNothing().when(songService).deleteSong(1L);
 
             mockMvc.perform(delete("/songs/1"))
-                    .andExpect(status().isNoContent()); 
+                    .andExpect(status().isNoContent());
 
             verify(songService, times(1)).deleteSong(1L);
         }
@@ -477,4 +476,4 @@ void testUpdateSong_FutureReleaseYear() throws Exception {
                     .andExpect(status().isMethodNotAllowed());
         }
     }
-    }
+}
