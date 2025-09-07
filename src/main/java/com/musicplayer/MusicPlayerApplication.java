@@ -14,10 +14,4 @@ public class MusicPlayerApplication {
 
 }
 
-@RestController
-class HelloController {
-    @GetMapping("/hello")
-    public String sayHello() {
-        return "Hello, Music Player!";
-    }
-}
+
