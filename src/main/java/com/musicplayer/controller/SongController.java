@@ -41,8 +41,10 @@ public Page<Song> getPaginatedSongs(
     }
 
     @PutMapping("/{id}")
-public Song updateSong(@PathVariable Long id, @RequestBody Song song) {
-    return songService.updateSong(id, song);
+public Song updateSong(
+        @PathVariable Long id,
+        @Valid @RequestBody Song updatedSong) {
+    return songService.updateSong(id, updatedSong);
 }
 
 @GetMapping("/search/artist")
