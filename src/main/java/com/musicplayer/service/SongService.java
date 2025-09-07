@@ -31,6 +31,10 @@ public class SongService {
         return songRepository.findAll(pageable);
     }
 
+    public List<Song> getAllSongs() {
+    return songRepository.findAll();
+}
+
   public Song saveSong(Song song) {
     if (song == null) {
         throw new IllegalArgumentException("Song cannot be null");

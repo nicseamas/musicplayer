@@ -4,6 +4,7 @@ import com.musicplayer.exception.SongNotFoundException;
 import com.musicplayer.model.Song;
 import com.musicplayer.repository.SongRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Song Service Tests")
 public class SongServiceTest {
 
      @Mock
@@ -51,10 +53,60 @@ public class SongServiceTest {
         song.setDuration(240);
         song.setReleaseYear(2023);
     }
+    @Nested
+    @DisplayName("Get All Songs Tests")
+class GetAllSongsTests {
+
+    @Test
+     @DisplayName("Should return list of songs when songs exist")
+    void whenSongsExist_thenReturnSongList() {
+        
+        
+
+        Song song2 = new Song();
+        song2.setId(2L);
+        song2.setTitle("Declan Rice");
+        song2.setArtist("Odumodublvck");
+        song2.setAlbum("Eziokwu");
+        song2.setDuration(200);
+        song2.setReleaseYear(2023);
+
+        List<Song> songs = Arrays.asList(song, song2);
+
+        when(songRepository.findAll()).thenReturn(songs);
+
+        
+        List<Song> result = songService.getAllSongs();
+
+        
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Dog Eat Dog II", result.get(0).getTitle());
+        assertEquals("Declan Rice", result.get(1).getTitle());
+        verify(songRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("Should return empty list when no songs exist")
+    void whenNoSongsExist_thenReturnEmptyList() {
+        
+        when(songRepository.findAll()).thenReturn(Collections.emptyList());
+
+        
+        List<Song> result = songService.getAllSongs();
+
+        
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(songRepository, times(1)).findAll();
+    }
+}
  @Nested
+  @DisplayName("Get Song By ID Tests")
     class GetSongByIdTests {
         
         @Test
+        @DisplayName("Should return song when valid ID exists")
         void whenSongExists_thenReturnSong() {
             when(songRepository.findById(1L)).thenReturn(Optional.of(song));
 
@@ -73,6 +125,7 @@ public class SongServiceTest {
         }
 
         @Test
+         @DisplayName("Should throw exception when song does not exist")
         void whenSongNotExists_thenThrowException() {
             Long songId = 1L;
             when(songRepository.findById(songId)).thenReturn(Optional.empty());
@@ -90,7 +143,8 @@ public class SongServiceTest {
         
         @ParameterizedTest
         @ValueSource(longs = {-1L, 0L, 999L})
-        void whenInvalidIdProvided_thenThrowException(Long invalidId) {
+        @DisplayName("Should throw exception for invalid song IDs")
+         void whenInvalidIdProvided_thenThrowException(Long invalidId) {
             when(songRepository.findById(invalidId)).thenReturn(Optional.empty());
 
             SongNotFoundException exception = assertThrows(
@@ -105,6 +159,7 @@ public class SongServiceTest {
 
 
      @Nested
+     @DisplayName("Pagination Tests")
     class PaginationTests {
         
         @ParameterizedTest
@@ -122,6 +177,7 @@ public class SongServiceTest {
             "id, asc",
             "id, desc"
         })
+        @DisplayName("Should return sorted page for various sort options")
         void withVariousSortOptions_thenReturnSortedPage(String sortBy, String direction) {
             Sort.Direction sortDirection = "asc".equalsIgnoreCase(direction) 
                 ? Sort.Direction.ASC : Sort.Direction.DESC;
@@ -143,6 +199,7 @@ public class SongServiceTest {
             "2, 20",
             "0, 50"
         })
+        @DisplayName("Should return correct page for various page sizes")
         void withVariousPageSizes_thenReturnCorrectPage(int pageNumber, int pageSize) {
             Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("title").ascending());
             Page<Song> page = new PageImpl<>(Collections.singletonList(song));
@@ -156,6 +213,7 @@ public class SongServiceTest {
         }
         
         @Test
+        @DisplayName("Should use default ascending sort for invalid direction")
         void withInvalidSortDirection_thenUseDefaultAscending() {
             Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
             Page<Song> page = new PageImpl<>(Collections.singletonList(song));
@@ -169,9 +227,11 @@ public class SongServiceTest {
         }
     }
   @Nested
+@DisplayName("Save Song Tests")
 class SaveSongTests {
 
     @Test
+    @DisplayName("Should save song successfully with valid data")
     void whenValidSong_thenSaveSuccessfully() {
         
         when(songRepository.save(song)).thenReturn(song);
@@ -193,6 +253,7 @@ class SaveSongTests {
     }
 
     @Test
+     @DisplayName("Should throw exception when song is null")
     void whenSongIsNull_thenThrowIllegalArgumentException() {
         
         IllegalArgumentException exception = assertThrows(
@@ -205,6 +266,7 @@ class SaveSongTests {
     }
 
     @Test
+    @DisplayName("Should call repository save method")
     void whenSavingSong_thenRepositorySaveIsCalled() {
         
         when(songRepository.save(any(Song.class))).thenReturn(song);
@@ -218,6 +280,7 @@ class SaveSongTests {
     }
 
     @Test
+    @DisplayName("Should return null when repository returns null")
     void whenSongSavedReturnsNull_thenReturnNull() {
        
         when(songRepository.save(song)).thenReturn(null);
@@ -233,9 +296,11 @@ class SaveSongTests {
 
 
   @Nested
+  @DisplayName("Delete Song Tests")
     class DeleteSongTests {
         
         @Test
+        @DisplayName("Should delete song successfully when it exists")
         void whenSongExists_thenDeleteSuccessfully() {
             Long songId = 1L;
             when(songRepository.existsById(songId)).thenReturn(true);
@@ -248,6 +313,7 @@ class SaveSongTests {
         }
 
         @Test
+         @DisplayName("Should throw exception when song to delete does not exist")
         void whenSongNotExists_thenThrowException() {
             Long songId = 1L;
             when(songRepository.existsById(songId)).thenReturn(false);
@@ -265,6 +331,7 @@ class SaveSongTests {
         }
         
         @ParameterizedTest
+        @DisplayName("Should throw exception for invalid song IDs during deletion")
         @ValueSource(longs = {-1L, 0L, 999L})
         void whenInvalidIdProvided_thenThrowException(Long invalidId) {
             when(songRepository.existsById(invalidId)).thenReturn(false);
@@ -281,9 +348,11 @@ class SaveSongTests {
     }
 
  @Nested
+    @DisplayName("Update Song Tests")
     class UpdateSongTests {
         
         @Test
+        @DisplayName("Should update song successfully when it exists")
         void whenSongExists_thenUpdateSuccessfully() {
             when(songRepository.findById(1L)).thenReturn(Optional.of(song));
             when(songRepository.save(any(Song.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -311,6 +380,7 @@ class SaveSongTests {
         }
 
         @Test
+        @DisplayName("Should throw exception when updating non-existent song")
         void whenSongNotExists_thenThrowException() {
             Long songId = 1L;
             when(songRepository.findById(songId)).thenReturn(Optional.empty());
@@ -327,6 +397,7 @@ class SaveSongTests {
         }
         
         @Test
+        @DisplayName("Should throw exception when update song is null")
         void whenNullSong_thenThrowException() {
             assertThrows(IllegalArgumentException.class, 
                 () -> songService.updateSong(1L, null));
@@ -336,6 +407,7 @@ class SaveSongTests {
         
         @ParameterizedTest
         @ValueSource(longs = {-1L, 0L, 999L})
+        @DisplayName("Should throw exception for invalid song IDs during update")
         void whenInvalidIdProvided_thenThrowException(Long invalidId) {
             when(songRepository.findById(invalidId)).thenReturn(Optional.empty());
 
@@ -351,9 +423,11 @@ class SaveSongTests {
     }
 
  @Nested
+  @DisplayName("Search Songs By Artist Tests")
     class SearchSongsByArtistTests {
         
         @Test
+        @DisplayName("Should return songs when artist exists")
         void whenArtistExists_thenReturnSongs() {
             String artist = "Odumodublvck";
             when(songRepository.findByArtistContainingIgnoreCase(artist))
@@ -376,6 +450,7 @@ class SaveSongTests {
         }
 
         @Test
+        @DisplayName("Should throw exception when artist does not exist")
         void whenArtistNotExists_thenThrowException() {
             when(songRepository.findByArtistContainingIgnoreCase("Unknown"))
                     .thenReturn(Collections.emptyList());
@@ -393,6 +468,7 @@ class SaveSongTests {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = {" ", "   ", "\t", "\n"})
+        @DisplayName("Should throw exception for blank artist names")
         void whenBlankArtistProvided_thenThrowException(String blankArtist) {
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
@@ -406,9 +482,11 @@ class SaveSongTests {
 
    
    @Nested
+   @DisplayName("Search Songs By Album Tests")
     class SearchSongsByAlbumTests {
         
         @Test
+         @DisplayName("Should return songs when album exists")
         void whenAlbumExists_thenReturnSongs() {
             when(songRepository.findByAlbumContainingIgnoreCase("Eziokwu"))
                     .thenReturn(Arrays.asList(song));
@@ -429,6 +507,7 @@ class SaveSongTests {
         }
 
         @Test
+        @DisplayName("Should throw exception when album does not exist")
         void whenAlbumNotExists_thenThrowException() {
             when(songRepository.findByAlbumContainingIgnoreCase("Unknown"))
                     .thenReturn(Collections.emptyList());
@@ -447,6 +526,7 @@ class SaveSongTests {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = {" ", "   ", "\t", "\n"})
+        @DisplayName("Should throw exception for blank album names")
         void whenBlankAlbumProvided_thenThrowException(String blankAlbum) {
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
@@ -459,9 +539,11 @@ class SaveSongTests {
     }
      
        @Nested
+       @DisplayName("Search Songs By Title Tests")
     class SearchSongsByTitleTests {
         
         @Test
+         @DisplayName("Should return songs when title exists")
         void whenTitleExists_thenReturnSongs() {
             when(songRepository.findByTitleContainingIgnoreCase("Dog Eat Dog II"))
                     .thenReturn(Arrays.asList(song));
@@ -480,6 +562,7 @@ class SaveSongTests {
         }
 
         @Test
+        @DisplayName("Should throw exception when title does not exist")
         void whenTitleNotExists_thenThrowException() {
             when(songRepository.findByTitleContainingIgnoreCase("Unknown"))
                     .thenReturn(Collections.emptyList());
@@ -499,6 +582,7 @@ class SaveSongTests {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = {" ", "   ", "\t", "\n"})
+        @DisplayName("Should throw exception for blank titles")
         void whenBlankTitleProvided_thenThrowException(String blankTitle) {
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
@@ -511,9 +595,11 @@ class SaveSongTests {
     }
 
      @Nested
+     @DisplayName("Search Songs Tests")
     class SearchSongsTests {
         
         @Test
+         @DisplayName("Should return songs when all criteria match")
         void whenAllCriteriaMatch_thenReturnSongs() {
             String title = "Dog Eat Dog II";
             String artist = "Odumodublvck";
@@ -541,6 +627,7 @@ class SaveSongTests {
         }
 
         @Test
+        @DisplayName("Should throw exception when no criteria match")
         void whenNoCriteriaMatch_thenThrowException() {
             String title = "Unknown";
             String artist = "Unknown";
@@ -572,6 +659,7 @@ class SaveSongTests {
             "Dog, '', Eziokwu",
             "'', Odumodu, Eziokwu"
         })
+         @DisplayName("Should return songs with partial criteria")
         void withPartialCriteria_thenReturnMatchingSongs(String title, String artist, String album) {
             when(songRepository.findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCaseAndAlbumContainingIgnoreCase(
                     title, artist, album))
@@ -592,6 +680,7 @@ class SaveSongTests {
     "' ', ' ', ' '",
     "null, null, null"
 })
+  @DisplayName("Should throw exception when all criteria are blank")
 void whenAllCriteriaBlank_thenThrowException(String title, String artist, String album) {
     
     String normalizedTitle = "null".equals(title) ? null : title;

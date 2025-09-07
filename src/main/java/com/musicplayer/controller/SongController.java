@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/songs")
@@ -17,7 +18,7 @@ public class SongController {
     }
 
     @GetMapping("/{id}")
-    public Song getSongById(@PathVariable Long id) {
+    public Song getSongById(@PathVariable("id") Long id) {
     return songService.getSongById(id);
 }
     @GetMapping("/paginated")
@@ -30,15 +31,23 @@ public Page<Song> getPaginatedSongs(
     return songService.getSongs(page, size, sortBy, direction);
 }
 
-    @PostMapping
-    public Song addSong(@Valid @RequestBody Song song) {
+@GetMapping
+public List<Song> getAllSongs() {
+    return songService.getAllSongs();
+}
+
+@PostMapping
+@ResponseStatus(HttpStatus.CREATED) 
+public Song addSong(@Valid @RequestBody Song song) {
     return songService.saveSong(song);
 }
 
-    @DeleteMapping("/{id}")
-    public void deleteSong(@PathVariable Long id) {
-        songService.deleteSong(id);
-    }
+
+   @DeleteMapping("/{id}")
+@ResponseStatus(HttpStatus.NO_CONTENT) 
+public void deleteSong(@PathVariable Long id) {
+    songService.deleteSong(id);
+}
 
     @PutMapping("/{id}")
 public Song updateSong(
