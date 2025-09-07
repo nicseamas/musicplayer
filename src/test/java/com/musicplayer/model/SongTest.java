@@ -82,7 +82,7 @@ public class SongTest {
         Set<ConstraintViolation<Song>> violations = validator.validate(song);
         assertFalse(violations.isEmpty());
         assertEquals("Release year cannot be before 1877", violations.iterator().next().getMessage());
-        
+
     }
 
     @Test

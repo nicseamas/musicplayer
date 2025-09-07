@@ -18,106 +18,95 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
 
-        
         Map<String, String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .collect(Collectors.toMap(
                         fieldError -> fieldError.getField(),
                         fieldError -> fieldError.getDefaultMessage(),
-                        (msg1, msg2) -> msg1 
-                ));
+                        (msg1, msg2) -> msg1));
 
-        
-       return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation Failed","Input validation failed",request.getRequestURI(),errors);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation Failed", "Input validation failed",
+                request.getRequestURI(), errors);
     }
 
-    
-  @ExceptionHandler(SongNotFoundException.class)
-public ResponseEntity<Map<String, Object>> handleSongNotFound(SongNotFoundException ex, HttpServletRequest request) {
-    return buildErrorResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request.getRequestURI());
-}
+    @ExceptionHandler(SongNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleSongNotFound(
+            SongNotFoundException ex,
+            HttpServletRequest request) {
 
-    
-  
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request.getRequestURI(), null);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex,HttpServletRequest request) {
-        return buildErrorResponse( HttpStatus.BAD_REQUEST,"Bad Request",ex.getMessage(),request.getRequestURI());
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(
+            IllegalArgumentException ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request.getRequestURI(),
+                null);
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
 
-    
-     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGlobalException(Exception ex,HttpServletRequest request) {ex.printStackTrace();
-return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error","An unexpected error occurred",request.getRequestURI());
-}
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Bad Request", "Invalid ID format: " + ex.getValue(),
+                request.getRequestURI(), null);
+    }
 
-   
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodNotAllowed(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, "Method Not Allowed", ex.getMessage(),
+                request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleMalformedJson(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request) {
+
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Malformed JSON Request", "Invalid JSON format",
+                request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGlobalException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        ex.printStackTrace();
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error",
+                "An unexpected error occurred", request.getRequestURI(), null);
+    }
+
     private ResponseEntity<Map<String, Object>> buildErrorResponse(
-        HttpStatus status, String error, String message, String path) {
-
-    Map<String, Object> body = new HashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", status.value());
-    body.put("error", error);
-    body.put("message", message);
-    body.put("path", path);
-
-    return new ResponseEntity<>(body, status);
-}
-
-@ExceptionHandler(MethodArgumentTypeMismatchException.class)
-public ResponseEntity<Map<String, Object>> handleTypeMismatch(
-        MethodArgumentTypeMismatchException ex,
-        HttpServletRequest request) {
-
-    Map<String, Object> body = new HashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.BAD_REQUEST.value());
-    body.put("error", "Bad Request");
-    body.put("message", "Invalid ID format: " + ex.getValue());
-    body.put("path", request.getRequestURI());
-
-    return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-}
-
-@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-public ResponseEntity<Map<String, Object>> handleMethodNotAllowed(
-        HttpRequestMethodNotSupportedException ex,
-        HttpServletRequest request) {
-
-    Map<String, Object> body = new HashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.METHOD_NOT_ALLOWED.value());
-    body.put("error", "Method Not Allowed");
-    body.put("message", ex.getMessage());
-    body.put("path", request.getRequestURI());
-
-    return new ResponseEntity<>(body, HttpStatus.METHOD_NOT_ALLOWED);
-}
-
-
-private ResponseEntity<Map<String, Object>> buildErrorResponse(
-HttpStatus status,String error,String message,String path,Map<String, String> validationErrors) {
+            HttpStatus status,
+            String error,
+            String message,
+            String path,
+            Map<String, String> validationErrors) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());
         body.put("error", error);
         body.put("message", message);
-        body.put("errors", validationErrors);
         body.put("path", path);
 
-        return new ResponseEntity<>(body, status);
-    }
+        if (validationErrors != null && !validationErrors.isEmpty()) {
+            body.put("errors", validationErrors);
+        }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)public ResponseEntity<Map<String, Object>> handleMalformedJson(HttpMessageNotReadableException ex,HttpServletRequest request) {
-        return buildErrorResponse(HttpStatus.BAD_REQUEST,"Malformed JSON Request","Invalid JSON format",request.getRequestURI());
+        return new ResponseEntity<>(body, status);
     }
 }

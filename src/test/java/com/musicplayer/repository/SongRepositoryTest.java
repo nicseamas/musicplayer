@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Song Repository Tests")
 public class SongRepositoryTest {
 
-    @Autowired 
+    @Autowired
     private SongRepository songRepository;
 
     private Song song1;
@@ -31,7 +31,6 @@ public class SongRepositoryTest {
     void setUp() {
         songRepository.deleteAll();
 
-        
         song1 = new Song();
         song1.setTitle("Dog Eat Dog II");
         song1.setArtist("Odumodublvck");
@@ -46,7 +45,6 @@ public class SongRepositoryTest {
         song2.setDuration(200);
         song2.setReleaseYear(2023);
 
-        
         song1 = songRepository.save(song1);
         song2 = songRepository.save(song2);
     }
@@ -182,9 +180,9 @@ public class SongRepositoryTest {
         @Test
         @DisplayName("Should find songs by title, artist and album")
         void testCombinedSearch() {
-            List<Song> results = songRepository.findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCaseAndAlbumContainingIgnoreCase(
-                "Dog", "Odumodublvck", "Eziokwu"
-            );
+            List<Song> results = songRepository
+                    .findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCaseAndAlbumContainingIgnoreCase(
+                            "Dog", "Odumodublvck", "Eziokwu");
             assertEquals(1, results.size());
             assertEquals("Dog Eat Dog II", results.get(0).getTitle());
         }
@@ -192,12 +190,10 @@ public class SongRepositoryTest {
         @Test
         @DisplayName("Should return empty when no combined match")
         void testCombinedSearch_NotFound() {
-            List<Song> results = songRepository.findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCaseAndAlbumContainingIgnoreCase(
-                "Unknown", "Artist", "Album"
-            );
+            List<Song> results = songRepository
+                    .findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCaseAndAlbumContainingIgnoreCase(
+                            "Unknown", "Artist", "Album");
             assertTrue(results.isEmpty());
         }
     }
 }
-
-

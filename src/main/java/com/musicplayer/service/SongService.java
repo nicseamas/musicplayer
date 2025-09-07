@@ -32,16 +32,15 @@ public class SongService {
     }
 
     public List<Song> getAllSongs() {
-    return songRepository.findAll();
-}
-
-  public Song saveSong(Song song) {
-    if (song == null) {
-        throw new IllegalArgumentException("Song cannot be null");
+        return songRepository.findAll();
     }
-    return songRepository.save(song);
-}
 
+    public Song saveSong(Song song) {
+        if (song == null) {
+            throw new IllegalArgumentException("Song cannot be null");
+        }
+        return songRepository.save(song);
+    }
 
     public void deleteSong(Long id) {
         if (!songRepository.existsById(id)) {

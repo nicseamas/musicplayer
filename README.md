@@ -35,7 +35,7 @@ musicplayer/
 │
 ├──src/main/resources/
 │ ├── application.properties #DB config
-│ └── musicplayerdb.sql #(Preloaded dataset of 42 songs)
+│ └── musicplayerdb.sql #Preloaded dataset of 42 songs
 │
 ├── src/test/java/com/musicplayer/
 │ ├── controller/ #(SongControllerTest.java)
