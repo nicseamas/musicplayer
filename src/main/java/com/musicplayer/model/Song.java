@@ -27,7 +27,7 @@ public class Song {
   @NotBlank(message = "Artist name is required")
   private String artist;
 
-  private String album; // no need for validation for ep songs
+  private String album; 
 
  
  @Positive(message = "Duration must be greater than zero")
