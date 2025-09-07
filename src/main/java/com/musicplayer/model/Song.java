@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -33,7 +34,13 @@ public class Song {
  @Positive(message = "Duration must be greater than zero")
   private int duration;
 
- @Min(value = 1877, message = "Release year cannot be before 1877 ")
- @Max(value = 3000, message = "Release year cannot be after 3000")
-  private int releaseYear;
+@Min(value = 1877, message = "Release year cannot be before 1877")
+    private int releaseYear;
+
+    @AssertTrue(message = "Release year cannot be in the future")
+    public boolean isReleaseYearValid() {
+        return releaseYear <= java.time.Year.now().getValue();
+    }
 }
+
+
